@@ -1,40 +1,38 @@
-import skeakersImg from "./../assets/2.jpg";
-import Image from "./Image";
-const ProductCard = () => {
+import Image from "./UI/Image";
+import Button from "./UI/Button";
+import type { IProduct } from "./interfaces";
+import { txtSlicer } from "./Utilis/functions";
+
+interface IProps {
+  product: IProduct;
+}
+const ProductCard = ({ product }: IProps) => {
+  const { title, description, imageURL, price } = product;
   return (
-    <div className="text-lg">
-      <Image
-        imageURL={skeakersImg}
-        alt={"Product Name"}
-        className="rounded-md mb-3"
-      />
-      <h3>Nike Sports Sneakers</h3>
-      <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam asperiores
-        placeat adipisci totam esse dolorem, impedit eaque, deleniti reiciendis,
-        qui cumque amet voluptas saepe dolor aspernatur aliquid deserunt est
-        necessitatibus.
-      </p>
-      <div className="flex items-center my-4 m space-x-2">
-        <span className="w-5 h-5 rounded-full bg-amber-300 cursor-pointer"></span>
+    <div className="text-lg max-w-sm rounded-md p-2 flex flex-col mx-auto md:mx-0">
+      <Image imageURL={imageURL} alt={title} className="rounded-md mb-3" />
+      <h3>{title}</h3>
+      <p>{txtSlicer(description, 170)}</p>
+      <div className="flex items-center my-4  space-x-2">
+        <span className="w-5 h-5 rounded-full bg-red-500 cursor-pointer"></span>
         <span className="w-5 h-5 rounded-full bg-blue-400  cursor-pointer"></span>
         <span className="w-5 h-5 rounded-full bg-green-400 cursor-pointer"></span>
       </div>
       <div className="flex justify-between items-center">
-        <span>$1000</span>
+        <span>${price}</span>
         <Image
-          imageURL={skeakersImg}
-          alt={"Product Name"}
+          imageURL={imageURL}
+          alt={title}
           className="w-15 h-15 rounded-full object-cover"
         />
       </div>
       <div className="flex justify-between space-x-2 my-3">
-        <button className="bg-indigo-600 text-white flex-1 h-15 rounded-md  ">
+        <Button className="bg-indigo-600" width="w-full">
           Edit
-        </button>
-        <button className="bg-red-600    text-white  flex-1 h-15 rounded-md">
+        </Button>
+        <Button className="bg-red-600 " width="w-full">
           Delete
-        </button>
+        </Button>
       </div>
     </div>
   );
