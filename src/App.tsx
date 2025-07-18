@@ -1,21 +1,45 @@
 import ProductCard from "./Components/ProductCard";
 import { productList, formInputsList } from "./Data/index";
 import Model from "./Components/UI/Model";
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "./Components/UI/Button";
 import Input from "./Components/UI/Input";
+import type { IProduct } from "./Components/interfaces";
 export const App = () => {
+  const defaultProductObj = {
+    title: "",
+    description: "",
+    imageURL: "",
+    price: "",
+    colors: [],
+    category: {
+      name: "",
+      imageURL: "",
+    },
+  };
   /*_____________ State ____________*/
   const [isOpen, setIsOpen] = useState(false);
+  const [product, setProduct] = useState<IProduct>(defaultProductObj);
   /*_____________ Handler ____________*/
 
-  function openModel() {
-    setIsOpen(true);
-  }
-
-  function closeModel() {
-    setIsOpen(false);
-  }
+  const openModel = () => setIsOpen(true);
+  const closeModel = () => setIsOpen(false);
+  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = e.target;
+    setProduct({
+      ...product,
+      [name]: value,
+    });
+  };
+  const onSumbitHandler = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(product);
+  };
+  const onCancel = () => {
+    setProduct(defaultProductObj);
+    console.log("cancel");
+    closeModel();
+  };
   /*_____________ Render ____________*/
   const renderProductList = productList.map((product) => (
     <ProductCard key={product.id} product={product} />
@@ -26,7 +50,13 @@ export const App = () => {
         <label className="font-medium text-md m-1" htmlFor={input.id}>
           {input.label}
         </label>
-        <Input type={input.type} id={input.id} name={input.name} />
+        <Input
+          type={input.type}
+          id={input.id}
+          name={input.name}
+          value={product[input.name]}
+          onChange={onChangeHandler}
+        />
       </div>
     );
   });
@@ -44,7 +74,7 @@ export const App = () => {
           {renderProductList}
         </div>
         <Model isOpen={isOpen} isClosed={closeModel} title="ADD A NEW  PRODUCT">
-          <form className="space-y-1">
+          <form className="space-y-1" onSubmit={onSumbitHandler}>
             {renderInputTypes}
             <div className="flex gap-2">
               <Button
@@ -56,7 +86,7 @@ export const App = () => {
               <Button
                 className="bg-gray-400  hover:bg-gray-400/30"
                 width="w-full"
-                onClick={closeModel}
+                onClick={onCancel}
               >
                 cancel
               </Button>
