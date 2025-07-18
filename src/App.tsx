@@ -5,6 +5,8 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "./Components/UI/Button";
 import Input from "./Components/UI/Input";
 import type { IProduct } from "./Components/interfaces";
+import ProductValidation from "./Validation/ProductValidation";
+import ErrorMsg from "./Components/ErrorMsg";
 export const App = () => {
   const defaultProductObj = {
     title: "",
@@ -20,7 +22,14 @@ export const App = () => {
   /*_____________ State ____________*/
   const [isOpen, setIsOpen] = useState(false);
   const [product, setProduct] = useState<IProduct>(defaultProductObj);
-  /*_____________ Handler ____________*/
+  const [errors, setErrors] = useState({
+    title: "",
+    description: "",
+    imageURL: "",
+    price: "",
+  });
+  console.log("errors:", errors);
+  /*_____________ Handler ____________*/ 
 
   const openModel = () => setIsOpen(true);
   const closeModel = () => setIsOpen(false);
@@ -30,15 +39,33 @@ export const App = () => {
       ...product,
       [name]: value,
     });
-  };
-  const onSumbitHandler = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(product);
+    setErrors({
+     ...errors,
+     [name]: ""
+    })
   };
   const onCancel = () => {
     setProduct(defaultProductObj);
     console.log("cancel");
     closeModel();
+  };
+
+  const onSumbitHandler = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();  
+    const { title, description, imageURL, price } = product;
+    const errors = ProductValidation({
+      title,
+      description,
+      imageURL,
+      price,
+    });
+    const hasErrors =
+      Object.values(errors).some((value) => value.trim() !== "") &&
+      Object.values(errors).every((value) => value === "");
+
+    if (!hasErrors) {
+      setErrors(errors);
+    }
   };
   /*_____________ Render ____________*/
   const renderProductList = productList.map((product) => (
@@ -57,6 +84,7 @@ export const App = () => {
           value={product[input.name]}
           onChange={onChangeHandler}
         />
+        <ErrorMsg msg={errors[input.name]} />
       </div>
     );
   });
