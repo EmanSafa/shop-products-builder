@@ -23,7 +23,7 @@ const ProductCard = ({ product }: IProps) => {
         <span className="w-5 h-5 rounded-full bg-green-400 cursor-pointer"></span>
       </div>
       <div className="flex justify-between items-center">
-        <span>${price}</span>
+        <span className="text-blue-950">${price}</span>
         <Image
           imageURL={imageURL}
           alt={title}
