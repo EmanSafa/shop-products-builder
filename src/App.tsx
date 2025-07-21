@@ -1,5 +1,5 @@
 import ProductCard from "./Components/ProductCard";
-import { productList, formInputsList } from "./Data/index";
+import { productList, formInputsList, colors, categories } from "./Data/index";
 import Model from "./Components/UI/Model";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "./Components/UI/Button";
@@ -7,32 +7,45 @@ import Input from "./Components/UI/Input";
 import type { IProduct } from "./Components/interfaces";
 import ProductValidation from "./Validation/ProductValidation";
 import ErrorMsg from "./Components/ErrorMsg";
+import CircleColor from "./Components/CircleColor";
+import { v4 as uuid } from "uuid";
+import SelectMenu from "./Components/UI/SelectMenu";
+import type { TProductNames } from "./Components/Types";
+
 export const App = () => {
   const defaultProductObj = {
     title: "",
     description: "",
     imageURL: "",
     price: "",
-    colors: [],
+    colors: [] as string[],
     category: {
       name: "",
       imageURL: "",
     },
   };
+
   /*_____________ State ____________*/
+  const [products, setProducts] = useState<IProduct[]>(productList);
   const [isOpen, setIsOpen] = useState(false);
   const [product, setProduct] = useState<IProduct>(defaultProductObj);
+  const [tempColors, setTempColors] = useState<string[]>([]);
+  const [selectedCategory, setselectedCategory] = useState(categories[0]);
+  const [productToEdit, setProductToEdit] = useState(defaultProductObj);
   const [errors, setErrors] = useState({
     title: "",
     description: "",
     imageURL: "",
     price: "",
   });
-  console.log("errors:", errors);
-  /*_____________ Handler ____________*/ 
+  const [isOpenEditModel, setIsOpenEditModel] = useState(false);
+  // console.log("errors:", errors);
+  /*_____________ Handler ____________*/
 
   const openModel = () => setIsOpen(true);
   const closeModel = () => setIsOpen(false);
+  const openEditModel = () => setIsOpenEditModel(true);
+  const closeEditModel = () => setIsOpenEditModel(false);
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     setProduct({
@@ -40,9 +53,20 @@ export const App = () => {
       [name]: value,
     });
     setErrors({
-     ...errors,
-     [name]: ""
-    })
+      ...errors,
+      [name]: "",
+    });
+  };
+  const onChangeEditHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const { value, name } = e.target;
+    setProduct({
+      ...product,
+      [name]: value,
+    });
+    setErrors({
+      ...errors,
+      [name]: "",
+    });
   };
   const onCancel = () => {
     setProduct(defaultProductObj);
@@ -51,7 +75,7 @@ export const App = () => {
   };
 
   const onSumbitHandler = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();  
+    e.preventDefault();
     const { title, description, imageURL, price } = product;
     const errors = ProductValidation({
       title,
@@ -66,10 +90,48 @@ export const App = () => {
     if (!hasErrors) {
       setErrors(errors);
     }
+    setProducts((prev) => [
+      ...prev,
+      {
+        ...product,
+        colors: tempColors,
+        id: uuid(),
+        category: selectedCategory,
+      },
+    ]);
+    setProduct(defaultProductObj);
+    setTempColors([]);
+    closeModel();
+  };
+  const onSumbitEditHandler = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const { title, description, imageURL, price } = productToEdit;
+    const errors = ProductValidation({
+      title,
+      description,
+      imageURL,
+      price,
+    });
+    const hasErrors =
+      Object.values(errors).some((value) => value.trim() !== "") &&
+      Object.values(errors).every((value) => value === "");
+
+    if (!hasErrors) {  
+      setErrors(errors);
+    }
+    setProductToEdit(defaultProductObj);
+    setProduct(defaultProductObj);
+    setTempColors([]);
+    closeModel();
   };
   /*_____________ Render ____________*/
-  const renderProductList = productList.map((product) => (
-    <ProductCard key={product.id} product={product} />
+  const renderProductList = products.map((product) => (
+    <ProductCard
+      key={product.id}
+      product={product}
+      setProductToEdit={setProductToEdit}
+      openEditModel={openEditModel}
+    />
   ));
   const renderInputTypes = formInputsList.map((input) => {
     return (
@@ -88,6 +150,42 @@ export const App = () => {
       </div>
     );
   });
+  const renderColors = colors.map((color) => {
+    return (
+      <CircleColor
+        key={color}
+        color={color}
+        onClick={() => {
+          if (tempColors.includes(color)) {
+            setTempColors((prev) => prev.filter((item) => item !== color));
+            return;
+          }
+          setTempColors((prev) => [...prev, color]);
+        }}
+      />
+    );
+  });
+  const renderProductEditWithErrorMsg = (
+    id: string,
+    label: string,
+    name: TProductNames
+  ) => {
+    return (
+      <div className="flex flex-col text-xl text-gray-800">
+        <label className="font-medium text-md m-1" htmlFor={id}>
+          {label}
+        </label>
+        <Input
+          type="text"
+          id={id}
+          name={name}
+          value={productToEdit[name]}
+          onChange={onChangeEditHandler}
+        />
+        <ErrorMsg msg={""} />
+      </div>
+    );
+  };
 
   return (
     <>
@@ -101,9 +199,83 @@ export const App = () => {
         >
           {renderProductList}
         </div>
+        {/* Add Product Modal */}
         <Model isOpen={isOpen} isClosed={closeModel} title="ADD A NEW  PRODUCT">
           <form className="space-y-1" onSubmit={onSumbitHandler}>
             {renderInputTypes}
+            <SelectMenu
+              selected={selectedCategory}
+              setSelected={setselectedCategory}
+            />
+            <div className="space-x-3 flex items-center justify-center m-4  ">
+              {renderColors}
+            </div>
+            <div className="flex items-center flex-wrap space-x-1">
+              {tempColors.map((color) => (
+                <span
+                  key={color}
+                  className="p-1 rounded-md text-white text-sm"
+                  style={{ background: color }}
+                >
+                  {color}
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                className="bg-indigo-600 hover:bg-indigo-500/30"
+                width="w-full"
+              >
+                Submit
+              </Button>
+              <Button
+                className="bg-gray-400  hover:bg-gray-400/30"
+                width="w-full"
+                onClick={onCancel}
+              >
+                cancel
+              </Button>
+            </div>
+          </form>
+        </Model>
+        {/* Edit Product Modal */}
+        <Model
+          isOpen={isOpenEditModel}
+          isClosed={closeEditModel}
+          title="EDIT PRODUCT"
+        >
+          <form className="space-y-1" onSubmit={onSumbitEditHandler}>
+            {renderProductEditWithErrorMsg("title", "Product Title", "title")}
+            {renderProductEditWithErrorMsg(
+              "description",
+              "Product Description",
+              "description"
+            )}
+            {renderProductEditWithErrorMsg(
+              "imageURL",
+              "Product ImageURL",
+              "imageURL"
+            )}
+            {renderProductEditWithErrorMsg("price", "Product Price", "price")}
+
+            {/* <SelectMenu
+              selected={selectedCategory}
+              setSelected={setselectedCategory}
+            /> */}
+            {/* <div className="space-x-3 flex items-center justify-center m-4  ">
+              {renderColors}
+            </div>
+            <div className="flex items-center flex-wrap space-x-1">
+              {tempColors.map((color) => (
+                <span
+                  key={color}
+                  className="p-1 rounded-md text-white text-sm"
+                  style={{ background: color }}
+                >
+                  {color}
+                </span>
+              ))}
+            </div> */}
             <div className="flex gap-2">
               <Button
                 className="bg-indigo-600 hover:bg-indigo-500/30"

@@ -38,6 +38,7 @@ const ProductValidation = (product: {
   if (!product.price.trim() || isNaN(Number(product.price))) {
     errors.price = "Vaild price is required";
   }
+
   return errors;
 };
 
