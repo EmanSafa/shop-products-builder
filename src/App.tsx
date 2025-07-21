@@ -39,7 +39,8 @@ export const App = () => {
     price: "",
   });
   const [isOpenEditModel, setIsOpenEditModel] = useState(false);
-  // console.log("errors:", errors);
+  const [productToEditIdx, setProductToEditIdx] = useState<number>(0);
+
   /*_____________ Handler ____________*/
 
   const openModel = () => setIsOpen(true);
@@ -59,8 +60,8 @@ export const App = () => {
   };
   const onChangeEditHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    setProduct({
-      ...product,
+    setProductToEdit({
+      ...productToEdit,
       [name]: value,
     });
     setErrors({
@@ -103,7 +104,7 @@ export const App = () => {
     setTempColors([]);
     closeModel();
   };
-  const onSumbitEditHandler = (e: FormEvent<HTMLFormElement>) => {
+  const onSumbitEditHandler = (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const { title, description, imageURL, price } = productToEdit;
     const errors = ProductValidation({
@@ -113,24 +114,33 @@ export const App = () => {
       price,
     });
     const hasErrors =
-      Object.values(errors).some((value) => value.trim() !== "") &&
+      Object.values(errors).some((value) => value.trim() === "") &&
       Object.values(errors).every((value) => value === "");
 
-    if (!hasErrors) {  
+    if (!hasErrors) {
       setErrors(errors);
+      return;
     }
+    const updatedProducts = [...products];
+    updatedProducts[productToEditIdx] = {
+      ...productToEdit,
+      colors: tempColors.concat(productToEdit.colors),
+    };
+    setProducts(updatedProducts);
     setProductToEdit(defaultProductObj);
-    setProduct(defaultProductObj);
     setTempColors([]);
-    closeModel();
+    closeEditModel();
   };
+
   /*_____________ Render ____________*/
-  const renderProductList = products.map((product) => (
+  const renderProductList = products.map((product, idx) => (
     <ProductCard
       key={product.id}
       product={product}
       setProductToEdit={setProductToEdit}
       openEditModel={openEditModel}
+      setProductToEditIdx={setProductToEditIdx}
+      idx={idx}
     />
   ));
   const renderInputTypes = formInputsList.map((input) => {
@@ -160,6 +170,10 @@ export const App = () => {
             setTempColors((prev) => prev.filter((item) => item !== color));
             return;
           }
+          if (productToEdit.colors.includes(color)) {
+            setTempColors((prev) => prev.filter((item) => item !== color));
+            return;
+          }
           setTempColors((prev) => [...prev, color]);
         }}
       />
@@ -182,7 +196,7 @@ export const App = () => {
           value={productToEdit[name]}
           onChange={onChangeEditHandler}
         />
-        <ErrorMsg msg={""} />
+        <ErrorMsg msg={errors[name]} />
       </div>
     );
   };
@@ -258,15 +272,17 @@ export const App = () => {
             )}
             {renderProductEditWithErrorMsg("price", "Product Price", "price")}
 
-            {/* <SelectMenu
-              selected={selectedCategory}
-              setSelected={setselectedCategory}
-            /> */}
-            {/* <div className="space-x-3 flex items-center justify-center m-4  ">
+            <SelectMenu
+              selected={productToEdit.category}
+              setSelected={(value) =>
+                setProductToEdit({ ...productToEdit, category: value })
+              }
+            />
+            <div className="space-x-3 flex items-center justify-center m-4  ">
               {renderColors}
             </div>
             <div className="flex items-center flex-wrap space-x-1">
-              {tempColors.map((color) => (
+              {tempColors.concat(productToEdit.colors).map((color) => (
                 <span
                   key={color}
                   className="p-1 rounded-md text-white text-sm"
@@ -275,7 +291,7 @@ export const App = () => {
                   {color}
                 </span>
               ))}
-            </div> */}
+            </div>
             <div className="flex gap-2">
               <Button
                 className="bg-indigo-600 hover:bg-indigo-500/30"
