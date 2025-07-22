@@ -11,8 +11,9 @@ interface IProps {
   isClosed: () => void;
   title?: string;
   children: ReactNode;
+  description?: string;
 }
-const Model = ({ isOpen, isClosed, title, children }: IProps) => {
+const Model = ({ isOpen, isClosed, title, children, description }: IProps) => {
   return (
     <>
       {isOpen && (
@@ -33,12 +34,15 @@ const Model = ({ isOpen, isClosed, title, children }: IProps) => {
                 >
                   {title && (
                     <DialogTitle
-                      as="h3"
+                      as="h2"
                       className="text-base/7 font-medium text-gray-800 text-xl font-extrabold"
                     >
                       {title}
                     </DialogTitle>
                   )}
+                  <div className="text-md pt-3 text-gray-500">
+                    {description}
+                  </div>
                   <div className="mt-4 text-xl">{children}</div>
                 </DialogPanel>
               </div>

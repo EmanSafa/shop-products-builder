@@ -10,6 +10,7 @@ interface IProps {
   openEditModel: () => void;
   setProductToEditIdx: (value: number) => void;
   idx: number;
+  openConfirmModal: () => void;
 }
 
 const ProductCard = ({
@@ -18,11 +19,16 @@ const ProductCard = ({
   openEditModel,
   idx,
   setProductToEditIdx,
+  openConfirmModal,
 }: IProps) => {
   const OnEdit = () => {
     setProductToEdit(product);
     openEditModel();
     setProductToEditIdx(idx);
+  };
+  const onRemove = () => {
+    setProductToEdit(product);
+    openConfirmModal();
   };
   const { title, description, imageURL, price, colors, category } = product;
   const renderColors = colors.map((color) => {
@@ -59,10 +65,18 @@ const ProductCard = ({
       </div>
 
       <div className="flex justify-between space-x-2 my-3">
-        <Button className="bg-indigo-600" width="w-full" onClick={OnEdit}>
+        <Button
+          className="bg-indigo-600 hover:bg-indigo-800"
+          width="w-full"
+          onClick={OnEdit}
+        >
           Edit
         </Button>
-        <Button className="bg-pink-700 " width="w-full">
+        <Button
+          className="bg-pink-700  hover:bg-pink-900"
+          width="w-full"
+          onClick={onRemove}
+        >
           Remove
         </Button>
       </div>
