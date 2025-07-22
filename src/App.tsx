@@ -276,7 +276,7 @@ export const App = () => {
               selected={productToEdit.category}
               setSelected={(value) =>
                 setProductToEdit({ ...productToEdit, category: value })
-              }
+              } 
             />
             <div className="space-x-3 flex items-center justify-center m-4  ">
               {renderColors}
