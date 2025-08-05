@@ -1,3 +1,4 @@
+import { memo } from 'react';
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => {
   return (
     <input
@@ -9,4 +10,4 @@ const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => {
     />
   );
 };
-export default Input;
+export default memo(Input);
