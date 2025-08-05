@@ -3,6 +3,7 @@ import Button from "./UI/Button";
 import type { IProduct } from "./interfaces";
 import { txtSlicer, numberWithCommas } from "./Utilis/functions";
 import CircleColor from "./CircleColor";
+import { memo } from "react";
 
 interface IProps {
   product: IProduct;
@@ -84,4 +85,4 @@ const ProductCard = ({
   );
 };
 
-export default ProductCard;
+export default memo(ProductCard);

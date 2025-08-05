@@ -1,17 +1,18 @@
 import ProductCard from "./Components/ProductCard";
 import { productList, formInputsList, colors, categories } from "./Data/index";
 import Model from "./Components/UI/Model";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useCallback, useState, type ChangeEvent, type FormEvent } from "react";
 import Button from "./Components/UI/Button";
 import Input from "./Components/UI/Input";
 import type { IProduct } from "./Components/interfaces";
-import ProductValidation from "./Validation/ProductValidation";
+
 import ErrorMsg from "./Components/ErrorMsg";
 import CircleColor from "./Components/CircleColor";
 import { v4 as uuid } from "uuid";
 import SelectMenu from "./Components/UI/SelectMenu";
 import type { TProductNames } from "./Components/Types";
 import toast, { Toaster } from "react-hot-toast";
+import ProductValidation from "./Data/Validation/ProductValidation";
 
 export const App = () => {
   const defaultProductObj = {
@@ -32,7 +33,8 @@ export const App = () => {
   const [product, setProduct] = useState<IProduct>(defaultProductObj);
   const [tempColors, setTempColors] = useState<string[]>([]);
   const [selectedCategory, setselectedCategory] = useState(categories[0]);
-  const [productToEdit, setProductToEdit] = useState(defaultProductObj);
+  const [productToEdit, setProductToEdit] =
+    useState<IProduct>(defaultProductObj);
   const [isOpenConfirmModal, setIsOpenConfirmModal] = useState(false);
   const [errors, setErrors] = useState({
     title: "",
@@ -47,9 +49,9 @@ export const App = () => {
 
   const openModel = () => setIsOpen(true);
   const closeModel = () => setIsOpen(false);
-  const openEditModel = () => setIsOpenEditModel(true);
+  const openEditModel = useCallback(() => setIsOpenEditModel(true), []);
   const closeEditModel = () => setIsOpenEditModel(false);
-  const openConfirmModal = () => setIsOpenConfirmModal(true);
+  const openConfirmModal = useCallback(() => setIsOpenConfirmModal(true), []);
   const closeConfirmModal = () => setIsOpenConfirmModal(false);
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +85,7 @@ export const App = () => {
     const filtered = products.filter(
       (product) => product.id !== productToEdit.id
     );
+
     closeConfirmModal();
     setProducts(filtered);
     toast(`Product ${product.title} Removed! `, {
