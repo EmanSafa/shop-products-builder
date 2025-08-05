@@ -54,17 +54,11 @@ export const App = () => {
   const openConfirmModal = useCallback(() => setIsOpenConfirmModal(true), []);
   const closeConfirmModal = () => setIsOpenConfirmModal(false);
 
-  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+  const onChangeHandler = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
-    setProduct({
-      ...product,
-      [name]: value,
-    });
-    setErrors({
-      ...errors,
-      [name]: "",
-    });
-  };
+    setProduct((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  }, []);
   const onChangeEditHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target;
     setProductToEdit({
